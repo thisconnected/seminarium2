@@ -1,0 +1,64 @@
+#+TITLE: Emulacja procesora 8086 oparta na nowoczesnym standardzie języka C++
+#+OPTIONS: toc:nil
+
+* Cel
+Zbudowanie biblioteki do emulacji 8086 w C++20, a nastepnie zbudowanie na jej podstawie emulatora 8086 ktory mozna byłoby wykonywać proste programy DOS.
+* Używane technologie
++ C++20
++ GCC
++ cmake
+
+* Demo
+
+
+#+begin_src asm
+        mov ah, 0
+  :label
+        add ah, 1  ;inc ah
+        cmp ah, 12
+        jne label
+        mov ah, 0
+        int 23h;	
+#+end_src
+
+
+* Obecne ograniczenia
+- tylko normalne formy instrukcji
+- ilość instrukcji
+- ręczny assembler (formy instrukcji)
+- brak grafiki    
+
+* Napotkane problemy
+
+- krótkie formy instrukcji
+  [[./add.png]]
+
+  
+* Napotkane problemu cd.
+- wielotrybowe instrukcje (CMP/ADD)
+  
+  ~ADD rm,imm8 vs CMP rm, imm8~ 
+  
+  [[./instruction.png]]
+* Miłe zaskoczenia
+- adresowanie
+  #+begin_src c++
+void Interpreter::ADD_byte(Instruction& insn)
+{
+  printf("Interpreter::ADD_byte(%p)\n", &insn);
+  int8_t src1 = insn.readFirstArgument<int8_t>();
+  int8_t src2 = insn.readSecondArgument<int8_t>();
+
+  int8_t dest = src1 + src2;
+
+  flags_add<int8_t>(insn.flags(), src1 ,src2);
+  printf("\tADD %d + %d = %d\n", src1,src2,dest);
+
+  insn.writeSecondArgument<int8_t>(dest);
+}
+
+  #+end_src
+  
+* Obecne pytania
+- rozszerzalność INT
+- MMU visibility
